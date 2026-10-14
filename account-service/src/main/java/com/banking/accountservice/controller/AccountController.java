@@ -18,7 +18,6 @@ import com.banking.accountservice.dto.CreateAccountRequest;
 import com.banking.accountservice.service.AccountService;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -45,17 +44,33 @@ public class AccountController {
         return ResponseEntity.ok(accountService.getBalance(accountNumber));
     }
 
+    /*
+    Block Account called by fraud detection service via kafka
+     */
+
     @PutMapping("/{accountNumber}/block")
     public ResponseEntity<String> blockAccount(@PathVariable String accountNumber) {
         accountService.blockAccount(accountNumber);
         return ResponseEntity.ok("Account blocked successfully");
     }
 
+    /*
+    Saga step 1 - deduct balance
+    Called by transaction service when transfer is initiated.
+    */
+
     @PutMapping("/{accountNumber}/deduct")
     public ResponseEntity<String> deductBalance(@PathVariable String accountNumber, @RequestParam BigDecimal amount) {
         accountService.deductBalance(accountNumber, amount);
         return ResponseEntity.ok("Balance deducted successfully");
     }
+
+    /*
+    Saga step 4 - compensating transaction endpoint
+    Called by transaction service in two scenarios:
+    1. fraud detected => refund sender
+    2. transaction completed => credit receiver
+    */
 
     @PutMapping("/{accountNumber}/credit")
     public ResponseEntity<String> creditBalance(@PathVariable String accountNumber, @RequestParam BigDecimal amount) {

@@ -58,10 +58,6 @@ public class AccountService {
         return account.getBalance();
     }
 
-    /*
-    Block Account called by fraud detection service via kafka
-     */
-
     public void blockAccount (String AccountNumber) {
         log.info("Blocking account : {}", AccountNumber);
         Account account = accountRepository.findByAccountNumber(AccountNumber)
@@ -70,11 +66,6 @@ public class AccountService {
         accountRepository.save(account);
         log.info("Account blocked : {}", AccountNumber);
     }
-
-    /*
-    Saga step 1 - deduct balance
-    Called by transaction service when transfer is initiated.
-    */
 
     public void deductBalance (String AccountNumber, BigDecimal amount) {
         log.info("Deducting balance {} from account : {}", amount, AccountNumber);
@@ -92,13 +83,6 @@ public class AccountService {
         accountRepository.save(account);
         log.info("Balance Updated. New Balance : {}", account.getBalance());
     }
-
-    /*
-    Saga step 4 - compensating transaction endpoint
-    Called by transaction service in two scenarios:
-    1. fraud detected => refund sender
-    2. transaction completed => credit receiver
-    */
 
     public void creditBalance (String AccountNumber, BigDecimal amount) {
         log.info("Credit balance {} to account : {}", amount, AccountNumber);
