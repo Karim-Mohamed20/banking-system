@@ -8,31 +8,31 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
     consumer:
-      group-id: transaction-service-group
+      group-id: fraud-service-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      #      properties:
-      #        spring:
-      #          json:
-      #            trusted:
-      #              packages: "*"
-      #            use:
-      #              type:
-      #                headers:
-      #            value:
-      #              default:
-      #                type: java.util.HashMap
       properties:
-        spring.json.trusted.packages: "*"
-        spring.json.use.type.headers: false
-        spring.json.value.default.type: java.util.HashMap
+        spring:
+          json:
+            trusted:
+              packages: "*"
+            use:
+              type:
+                headers:
+            value:
+              default:
+                type: java.util.HashMap
+#      properties:
+#        spring.json.trusted.packages: "*"
+#        spring.json.use.type.headers: false
+#        spring.json.value.default.type: java.util.HashMap
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
 server:
-  port: 8082
+  port: 8084
 
 account:
   service:
