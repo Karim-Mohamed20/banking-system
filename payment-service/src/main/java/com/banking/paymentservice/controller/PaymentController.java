@@ -36,7 +36,7 @@ public class PaymentController {
 
     // razorpay webhook endpoint
     @PostMapping("/webhook")
-    public ResponseEntity<String> handleWebhook (@RequestBody Map<String, String> payload) {
+    public ResponseEntity<String> handleWebhook (@RequestBody Map<String, Object> payload) {
         paymentService.handleWebhook(payload);
         return ResponseEntity.ok("Webhook processed");
     }

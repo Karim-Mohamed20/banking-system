@@ -33,8 +33,8 @@ public class TransactionService {
     private final RedisTemplate<String,String> redisTemplate;
 
     private static final String TRANSACTION_INITIATED_TOPIC = "transaction.initiated";
-    private static final String TRANSACTION_COMPLETED_TOPIC = "transaction.initiated";
-    private static final String TRANSACTION_REFUNDED_TOPIC = "transaction.initiated";
+    private static final String TRANSACTION_COMPLETED_TOPIC = "transaction.completed";
+    private static final String TRANSACTION_REFUNDED_TOPIC = "transaction.refunded";
     private static final String FRAUD_DETECTED_TOPIC = "fraud.detected";
 
     /*
