@@ -12,16 +12,33 @@ spring:
       server:
         webflux:
           routes:
+            # Forward each service's OpenAPI document through the gateway so the
+            # central Swagger UI can load it from the same origin.
+            - id: account-service-openapi
+              uri: http://localhost:8081
+              predicates:
+                - Path=/docs/accounts/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
+
+            - id: transaction-service-openapi
+              uri: http://localhost:8082
+              predicates:
+                - Path=/docs/transactions/v3/api-docs
+              filters:
+                - SetPath=/v3/api-docs
+
             # Account service route
             - id: account-service
               uri: http://localhost:8081
               predicates:
-                - Path=/api/v1/account/**
+                - Path=/api/v1/accounts/**
               filters:
                 - name: RequestRateLimiter
                   args:
                     redis-rate-limiter.replenishRate: 10
                     redis-rate-limiter.burstCapacity: 20
+                    key-resolver: "#{@keyResolver}"
 
             - id: transaction-service
               uri: http://localhost:8082
@@ -32,16 +49,17 @@ spring:
                   args:
                     redis-rate-limiter.replenishRate: 10
                     redis-rate-limiter.burstCapacity: 20
+                    key-resolver: "#{@keyResolver}"
 
-            - id: payment-service
-              uri: http://localhost:8083
-              predicates:
-                - Path=/api/v1/payments/**
-              filters:
-                - name: RequestRateLimiter
-                  args:
-                    redis-rate-limiter.replenishRate: 5
-                    redis-rate-limiter.burstCapacity: 10
+springdoc:
+  swagger-ui:
+    disable-swagger-default-url: true
+    urls-primary-name: Accounts
+    urls:
+      - name: Accounts
+        url: /docs/accounts/v3/api-docs
+      - name: Transactions
+        url: /docs/transactions/v3/api-docs
 
 server:
   port: 8080

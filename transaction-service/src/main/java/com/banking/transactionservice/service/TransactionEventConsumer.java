@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.security.SecureRandom;
 
 @Service
 @Slf4j
@@ -24,6 +25,7 @@ public class TransactionEventConsumer {
     private final RedisTemplate<String, String> redisTemplate;
     private final TransactionService transactionService;
     private static final long OTP_EXPIRY_MINUTES = 5;
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     private final KafkaTemplate<String, Object> kafkaTemplate;
     private static final String TRANSACTION_OTP_GENERATED_TOPIC = "transaction.otp.generated";
     /*
@@ -48,7 +50,7 @@ public class TransactionEventConsumer {
                 return;
             }
 
-            String otp  = String.format("%06d", (int) (Math.random() * 900000) + 100000);
+            String otp = String.format("%06d", SECURE_RANDOM.nextInt(900_000) + 100_000);
 
             // store otp in redis - expires in 5 minutes
 

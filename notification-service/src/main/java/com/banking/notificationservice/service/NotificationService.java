@@ -23,14 +23,10 @@ public class NotificationService {
 
             sendAlert(accountNumber,
                     "TRANSACTION VERIFICATION REQUIRED",
-                    String.format(
-                            "Suspicious activity detected on your account." +
-                            "Reason : %s " +
-                            "A transaction of %s is pending verification." +
-                            "Your OTP is %s. and valid for 5 minutes." +
-                            "If this wasn't you - ignore this message."
-
-                    )
+                    String.format("Suspicious activity detected on your account. Reason: %s. " +
+                                    "A transaction of %s is pending verification. Your OTP is %s and is valid for 5 minutes. " +
+                                    "If this wasn't you, contact your bank.",
+                            reason, amount, otp)
             );
         } catch (Exception e) {
             log.error("Error Sending OTP notification: {}",e.getMessage());
@@ -43,12 +39,12 @@ public class NotificationService {
         try {
             String senderAccount = (String) payload.get("senderAccountNumber");
             String receiverAccount = (String) payload.get("receiverAccountNumber");
-            String amount = (String) payload.get("amount");
+            String amount = payload.get("amount").toString();
             // Debit alert
             sendAlert(senderAccount, "Debit Alert",
                     String.format("%s Debited from account %s", amount, senderAccount));
             // Credit alert
-            sendAlert(senderAccount, "Credit Alert",
+            sendAlert(receiverAccount, "Credit Alert",
                     String.format("%s Credited to account %s", amount, receiverAccount));
 
         } catch (Exception e) {
@@ -77,7 +73,7 @@ public class NotificationService {
             @Payload Map<String,Object> payload) {
         try {
             String senderAccount = (String) payload.get("senderAccountNumber");
-            String amount = (String) payload.get("amount");
+            String amount = payload.get("amount").toString();
             String reason = (String) payload.get("reason");
 
             sendAlert(senderAccount,
@@ -89,40 +85,6 @@ public class NotificationService {
             log.error("Error Sending refunded notification: {}",e.getMessage());
         }
     }
-
-    @KafkaListener(topics = "payment.completed")
-    public void consumePaymentCompleted (
-            @Payload Map<String,Object> payload) {
-        try {
-            String accountNumber = (String) payload.get("accountNumber");
-            String amount = (String) payload.get("amount");
-
-            sendAlert(accountNumber,
-                    "Payment successful",
-                    String.format("payment of %s completed "+"Razorpay ID: %s", amount, payload.get("razorpayPaymentId")));
-
-        } catch (Exception e) {
-            log.error("Error Sending payment notification: {}",e.getMessage());
-        }
-    }
-
-    @KafkaListener(topics = "payment.failed")
-    public void consumePaymentFailed (
-            @Payload Map<String,Object> payload) {
-        try {
-            String accountNumber = (String) payload.get("accountNumber");
-            String amount = (String) payload.get("amount");
-
-            sendAlert(accountNumber,
-                    "Payment failed",
-                    String.format("payment of %s failed "+"Please Try again or contact support", amount));
-
-        } catch (Exception e) {
-            log.error("Error Sending payment failed notification: {}",e.getMessage());
-        }
-    }
-
-
 
     private void  sendAlert(String accountNumber, String subject, String message) {
 

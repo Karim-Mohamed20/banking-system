@@ -1,0 +1,33 @@
+# Maven build output
+**/target/
+**/build/
+**/out/
+*.class
+
+# IDE settings and project files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Maven wrapper download cache (wrapper scripts and properties stay tracked)
+**/.mvn/wrapper/maven-wrapper.jar
+
+# Logs and JVM crash output
+*.log
+hs_err_pid*
+replay_pid*
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Operating system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Generated Spring Initializr help pages
+**/HELP.md

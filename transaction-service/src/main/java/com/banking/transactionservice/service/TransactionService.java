@@ -12,8 +12,10 @@ import com.banking.transactionservice.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -97,6 +99,10 @@ public class TransactionService {
 
         Transaction transaction = transactionRepository.findById(transactionId).
                 orElseThrow(()  -> new RuntimeException("Transaction Not Found : "+ transactionId));
+        if (transaction.getTransactionStatus() != TransactionStatus.PENDING_VERIFICATION) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Transaction is not pending OTP verification");
+        }
         String otpKey = "verification:otp" + transactionId;
         String storedOTP = redisTemplate.opsForValue().get(otpKey);
 
@@ -130,7 +136,7 @@ public class TransactionService {
         //Publish refund event - notification service will alert user
         Map<String, Object> refundEvent = new HashMap<>();
         refundEvent.put("transactionId", transaction.getId());
-        refundEvent.put("sender Account Number", transaction.getSenderAccountNumber());
+        refundEvent.put("senderAccountNumber", transaction.getSenderAccountNumber());
         refundEvent.put("amount", transaction.getAmount());
         refundEvent.put("reason", reason);
 
@@ -144,7 +150,7 @@ public class TransactionService {
 
         Map<String, Object> fraudEvent = new HashMap<>();
         fraudEvent.put("transactionId", transaction.getId());
-        fraudEvent.put("account Number", transaction.getSenderAccountNumber());
+        fraudEvent.put("accountNumber", transaction.getSenderAccountNumber());
         fraudEvent.put("reason", reason);
 
         kafkaTemplate.send(FRAUD_DETECTED_TOPIC, transaction.getSenderAccountNumber(), fraudEvent);
